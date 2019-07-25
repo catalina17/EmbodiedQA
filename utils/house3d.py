@@ -50,16 +50,14 @@ class House3DUtils():
         self.target_obj_conn_map_dir = target_obj_conn_map_dir
 
         if build_graph == True:
-            if os.path.exists(
-                    os.path.join(graph_dir,
-                                 self.env.house.house['id'] + '.pkl')):
-                self.load_graph(
-                    os.path.join(graph_dir,
-                                 self.env.house.house['id'] + '.pkl'))
+            path = os.path.join(graph_dir,
+                                self.env.house.house['id'] + '.pkl')
+            if os.path.exists(path):
+                self.load_graph(path)
             else:
-                self.build_graph(
-                    save_path=os.path.join(
-                        graph_dir, self.env.house.house['id'] + '.pkl'))
+                self.build_graph(save_path=None)
+                    #save_path=os.path.join(
+                    #    graph_dir, self.env.house.house['id'] + '.pkl'))
 
         self.rooms, self.objects = self._parse()
 
@@ -252,7 +250,7 @@ class House3DUtils():
         if self.debug == True:
             print("--- %s seconds to build the graph ---" %
                   (time.time() - start_time))
-
+        """
         if save_path != None:
             start_time = time.time()
 
@@ -262,15 +260,18 @@ class House3DUtils():
             if self.debug == True:
                 print("--- %s seconds to save the graph ---" %
                       (time.time() - start_time))
+        """
 
     def load_graph(self, path):
         import time
         start_time = time.time()
 
-        from dijkstar import Graph
+        import pickle
+        g = pickle.load(open(path, 'rb'))
 
-        self.graph = Graph()
-        self.graph.load(path)
+        from dijkstar import Graph
+        self.graph = Graph(g)
+        #self.graph.load(path) TODO: this doesn't work!!! loads empty graph
 
         if self.debug == True:
             print("--- %s seconds to load the graph ---" %
@@ -290,8 +291,8 @@ class House3DUtils():
                                      self.env.house.house['id'] + '.pkl'))
                 else:
                     self.build_graph(
-                        save_path=os.path.join(
-                            graph_dir, self.env.house.house['id'] + '.pkl'))
+                        save_path=os.path.join(self.graph_dir,
+                                               self.env.house.house['id'] + '.pkl'))
             graph = self.graph
 
         cost_func = lambda u, v, e, prev_e: e['cost']
